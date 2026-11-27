@@ -12,6 +12,13 @@ Deno.serve(async(req)=>{
   const token=env("WLI_WORKER_TOKEN");
   if(req.method!=="POST"||!token||!equal(req.headers.get("x-wli-worker-token")||"",token))return new Response("Not authorised",{status:403});
   if(["SUPABASE_URL","SUPABASE_SERVICE_ROLE_KEY","RESEND_API_KEY","WLI_NOTIFICATION_FROM","WLI_NOTIFICATION_TO"].some(k=>!env(k)))return new Response("Delivery not configured",{status:503});
+  if(new URL(req.url).searchParams.get("test")==="1"){
+    const response=await fetch("https://api.resend.com/emails",{
+      method:"POST",headers:{"Authorization":"Bearer "+env("RESEND_API_KEY"),"Content-Type":"application/json","Idempotency-Key":"wli-setup-test-20261127"},
+      body:JSON.stringify({from:env("WLI_NOTIFICATION_FROM"),to:[env("WLI_NOTIFICATION_TO")],subject:"Wycliffe Legal Intelligence registration alerts test",text:"This is a setup test for your registration notification service. No personal information or real registration is included."})
+    });
+    return Response.json({test:true,accepted:response.ok,provider_status:response.status},{status:response.ok?200:502});
+  }
   const db=createClient(env("SUPABASE_URL"),env("SUPABASE_SERVICE_ROLE_KEY"),{auth:{persistSession:false}});
   const {data,error}=await db.rpc("wli_claim_notification_ids");
   if(error)return new Response("Queue unavailable",{status:500});
