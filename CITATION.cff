@@ -1,0 +1,9 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "Wycliffe Legal Intelligence"
+type: software
+authors:
+  - family-names: Mponda
+    given-names: Wycliffe Alpha
+repository-code: "https://github.com/wmps7/wycliffe-legal-intelligence"
+license: MIT
